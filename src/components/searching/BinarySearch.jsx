@@ -1,7 +1,8 @@
 import { useState, useCallback, useEffect } from 'react'
 import ReactFlow, { Background, Controls } from 'reactflow'
-import { Button, TextField, Box, Stack, Typography } from '@mui/material'
+import { Button, TextField, Box, Stack, Typography, useTheme, useMediaQuery } from '@mui/material'
 import ArrayNode from '../ArrayNode'
+import 'reactflow/dist/style.css'
 
 const nodeTypes = {
   arrayNode: ArrayNode,
@@ -18,11 +19,14 @@ const BinarySearch = () => {
   const [nodes, setNodes] = useState([])
   const [edges] = useState([])
   const [result, setResult] = useState('')
+  const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
 
   const createNodes = useCallback(() => {
+    const nodeSpacing = isMobile ? 100 : 150
     const newNodes = array.map((value, index) => ({
       id: `${index}`,
-      position: { x: index * 150 + 100, y: 150 },
+      position: { x: index * nodeSpacing + 100, y: 150 },
       data: { 
         label: value,
         isHighlighted: index === currentIndex,
@@ -32,7 +36,7 @@ const BinarySearch = () => {
       type: 'arrayNode'
     }))
     setNodes(newNodes)
-  }, [array, currentIndex, searchValue, found, leftIndex, rightIndex])
+  }, [array, currentIndex, searchValue, found, leftIndex, rightIndex, isMobile])
 
   const handleSearch = async () => {
     if (!searchValue || searching) return
@@ -119,23 +123,31 @@ const BinarySearch = () => {
 
   useEffect(() => {
     createNodes()
-  }, [array, currentIndex, searchValue, found, createNodes])
+  }, [array, currentIndex, searchValue, found, leftIndex, rightIndex, createNodes])
 
   return (
     <Box sx={{ height: '500px', width: '100%' }}>
       <Typography variant="h6" sx={{ mb: 2 }}>Binary Search</Typography>
-      <Stack direction="row" spacing={2} sx={{ mb: 2 }}>
+      <Stack 
+        direction={isMobile ? "column" : "row"} 
+        spacing={2} 
+        sx={{ mb: 2 }}
+      >
         <TextField
           label="Value"
           value={searchValue}
           onChange={(e) => setSearchValue(e.target.value)}
           type="number"
+          size={isMobile ? "small" : "medium"}
+          fullWidth={isMobile}
           disabled={searching}
         />
         <Button 
           variant="contained" 
           onClick={handleSearch}
           disabled={searching || !searchValue}
+          size={isMobile ? "small" : "medium"}
+          fullWidth={isMobile}
         >
           Search
         </Button>
@@ -143,6 +155,8 @@ const BinarySearch = () => {
           variant="contained" 
           onClick={handleAdd}
           disabled={searching || !searchValue}
+          size={isMobile ? "small" : "medium"}
+          fullWidth={isMobile}
         >
           Add
         </Button>
@@ -150,28 +164,40 @@ const BinarySearch = () => {
           variant="contained" 
           onClick={handleRemove}
           disabled={searching || !searchValue}
+          size={isMobile ? "small" : "medium"}
+          fullWidth={isMobile}
         >
           Remove
         </Button>
       </Stack>
       
       {result && (
-        <Typography sx={{ mb: 2 }} color={found ? "success.main" : "error.main"}>
+        <Typography 
+          variant={isMobile ? "body2" : "body1"} 
+          sx={{ mb: 2, color: 'black' }}
+          color={found ? "success.main" : "error.main"}
+        >
           {result}
         </Typography>
       )}
       
-      <Box sx={{ height: '400px', border: '1px solid #ccc' }}>
+      <div style={{ height: isMobile ? 300 : 400 }}>
         <ReactFlow 
           nodes={nodes}
           edges={edges}
           nodeTypes={nodeTypes}
           fitView
+          minZoom={0.2}
+          maxZoom={4}
         >
           <Background />
-          <Controls />
+          <Controls 
+            showZoom={!isMobile}
+            showFitView={!isMobile}
+            showInteractive={!isMobile}
+          />
         </ReactFlow>
-      </Box>
+      </div>
     </Box>
   )
 }

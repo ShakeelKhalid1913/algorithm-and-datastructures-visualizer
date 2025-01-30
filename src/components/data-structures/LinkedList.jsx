@@ -1,11 +1,18 @@
 import { useState, useCallback, useEffect } from 'react'
-import ReactFlow, { Background, Controls, MarkerType, Position } from 'reactflow'
+import ReactFlow, { 
+  Background, 
+  Controls, 
+  MarkerType, 
+  Position,
+  useNodesState,
+  useEdgesState
+} from 'reactflow'
 import { Button, TextField, Box, Stack, Typography, useTheme, useMediaQuery } from '@mui/material'
 import 'reactflow/dist/style.css'
 
 const LinkedList = () => {
-  const [nodes, setNodes] = useState([])
-  const [edges, setEdges] = useState([])
+  const [nodes, setNodes, onNodesChange] = useNodesState([])
+  const [edges, setEdges, onEdgesChange] = useEdgesState([])
   const [inputValue, setInputValue] = useState('')
   const [list, setList] = useState([])
   const [result, setResult] = useState('')
@@ -62,7 +69,7 @@ const LinkedList = () => {
       }
     }))
     setEdges(newEdges)
-  }, [list, isMobile])
+  }, [list, isMobile, setNodes, setEdges])
 
   useEffect(() => {
     createNodes()
@@ -89,18 +96,6 @@ const LinkedList = () => {
     setInputValue('')
     setResult('Reset linked list')
   }
-
-  const onNodesChange = useCallback((changes) => {
-    setNodes((nds) => {
-      return nds.map((node) => {
-        const change = changes.find((c) => c.id === node.id)
-        if (change) {
-          return { ...node, position: change.position || node.position }
-        }
-        return node
-      })
-    })
-  }, [])
 
   return (
     <Box sx={{ height: '500px', width: '100%' }}>
@@ -159,6 +154,7 @@ const LinkedList = () => {
           nodes={nodes}
           edges={edges}
           onNodesChange={onNodesChange}
+          onEdgesChange={onEdgesChange}
           fitView
           minZoom={0.2}
           maxZoom={4}
