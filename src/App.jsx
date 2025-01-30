@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Tabs, Tab, Typography, Paper } from '@mui/material'
+import { Tabs, Tab, Typography, Paper, useMediaQuery, useTheme } from '@mui/material'
 import 'reactflow/dist/style.css'
 import './App.css'
 import LinearSearch from './components/searching/LinearSearch'
@@ -12,7 +12,7 @@ import ArrayComponent from './components/data-structures/ArrayComponent'
 
 function TabPanel({ children, value, index }) {
   return (
-    <div hidden={value !== index} style={{ height: '100%' }}>
+    <div role="tabpanel" hidden={value !== index}>
       {value === index && children}
     </div>
   )
@@ -23,6 +23,8 @@ function App() {
   const [searchAlgo, setSearchAlgo] = useState(0)
   const [sortAlgo, setSortAlgo] = useState(0)
   const [dataStructure, setDataStructure] = useState(0)
+  const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
 
   const renderSortingAlgorithm = () => {
     switch(sortAlgo) {
@@ -33,7 +35,7 @@ function App() {
       case 2:
         return <SelectionSort />
       default:
-        return <InsertionSort />
+        return null
     }
   }
 
@@ -65,8 +67,12 @@ function App() {
   return (
     <div className="app">
       <Typography 
-        color="textPrimary"
-        variant="h3" component="h1" gutterBottom align="center" sx={{ mb: 4 }}>
+        // add color
+        color="primary"
+        variant={isMobile ? "h5" : "h3"} 
+        component="h1" 
+        sx={{ mb: 3, mt: 2 }}
+      >
         Algorithm and Data Structures Visualizer
       </Typography>
 
@@ -74,8 +80,8 @@ function App() {
         <Tabs 
           value={category} 
           onChange={(e, v) => setCategory(v)}
-          variant="fullWidth"
-          sx={{ borderBottom: 1, borderColor: 'divider' }}
+          variant={isMobile ? "scrollable" : "fullWidth"}
+          scrollButtons={isMobile ? "auto" : false}
         >
           <Tab label="Searching Algorithms" />
           <Tab label="Sorting Algorithms" />
@@ -88,7 +94,8 @@ function App() {
           <Tabs 
             value={searchAlgo} 
             onChange={(e, v) => setSearchAlgo(v)}
-            variant="fullWidth"
+            variant={isMobile ? "scrollable" : "fullWidth"}
+            scrollButtons={isMobile ? "auto" : false}
           >
             <Tab label="Linear Search" />
             <Tab label="Binary Search" />
@@ -104,7 +111,8 @@ function App() {
           <Tabs 
             value={sortAlgo} 
             onChange={(e, v) => setSortAlgo(v)}
-            variant="fullWidth"
+            variant={isMobile ? "scrollable" : "fullWidth"}
+            scrollButtons={isMobile ? "auto" : false}
           >
             <Tab label="Insertion Sort" />
             <Tab label="Bubble Sort" />
@@ -121,7 +129,8 @@ function App() {
           <Tabs 
             value={dataStructure} 
             onChange={(e, v) => setDataStructure(v)}
-            variant="fullWidth"
+            variant={isMobile ? "scrollable" : "fullWidth"}
+            scrollButtons={isMobile ? "auto" : false}
           >
             <Tab label="Array" />
             <Tab label="Linked List" />

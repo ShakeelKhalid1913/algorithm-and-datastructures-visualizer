@@ -1,8 +1,8 @@
 import { useState, useCallback, useEffect } from 'react'
 import ReactFlow, { Background, Controls } from 'reactflow'
-import { Button, TextField, Box, Stack, Typography } from '@mui/material'
-import { ArrowBack, ArrowForward } from '@mui/icons-material'
+import { Button, TextField, Box, Stack, Typography, useTheme, useMediaQuery } from '@mui/material'
 import ArrayNode from '../ArrayNode'
+import 'reactflow/dist/style.css'
 
 const nodeTypes = {
   arrayNode: ArrayNode,
@@ -21,11 +21,14 @@ const InsertionSort = () => {
   const [steps, setSteps] = useState([])
   const [currentStep, setCurrentStep] = useState(-1)
   const [isAutoPlaying, setIsAutoPlaying] = useState(false)
+  const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
 
   const createNodes = useCallback(() => {
+    const nodeSpacing = isMobile ? 100 : 150
     const newNodes = array.map((value, index) => ({
       id: `${index}`,
-      position: { x: index * 150 + 100, y: 150 },
+      position: { x: index * nodeSpacing + 50, y: 150 },
       data: { 
         label: value,
         isHighlighted: index === currentIndex,
@@ -35,7 +38,7 @@ const InsertionSort = () => {
       type: 'arrayNode'
     }))
     setNodes(newNodes)
-  }, [array, currentIndex, compareIndex, sortedUntil])
+  }, [array, currentIndex, compareIndex, sortedUntil, isMobile])
 
   const generateSteps = () => {
     const steps = []
@@ -241,22 +244,30 @@ const InsertionSort = () => {
 
   useEffect(() => {
     createNodes()
-  }, [array, currentIndex, compareIndex, sortedUntil, createNodes])
+  }, [createNodes])
 
   return (
     <Box sx={{ height: '500px', width: '100%' }}>
-      <Stack direction="row" spacing={2} sx={{ mb: 2 }}>
+      <Stack 
+        direction={isMobile ? "column" : "row"} 
+        spacing={2} 
+        sx={{ mb: 2 }}
+      >
         <TextField
           label="Add Number"
           value={inputValue}
           onChange={(e) => setInputValue(e.target.value)}
           type="number"
+          size={isMobile ? "small" : "medium"}
+          fullWidth={isMobile}
           disabled={sorting}
         />
         <Button 
           variant="contained" 
           onClick={handleAdd}
           disabled={sorting || !inputValue}
+          size={isMobile ? "small" : "medium"}
+          fullWidth={isMobile}
         >
           Add
         </Button>
@@ -265,25 +276,34 @@ const InsertionSort = () => {
           onClick={handleSort}
           disabled={sorting}
           color="primary"
+          size={isMobile ? "small" : "medium"}
+          fullWidth={isMobile}
         >
           Start Sort
         </Button>
         <Button 
           variant="outlined" 
           onClick={handleReset}
-          disabled={isAutoPlaying} // Only disable during auto-play
+          disabled={isAutoPlaying}
+          size={isMobile ? "small" : "medium"}
+          fullWidth={isMobile}
         >
           Reset
         </Button>
       </Stack>
 
       {sorting && (
-        <Stack direction="row" spacing={2} sx={{ mb: 2 }} justifyContent="center" alignItems="center">
+        <Stack 
+          direction={isMobile ? "column" : "row"} 
+          spacing={2} 
+          sx={{ mb: 2 }}
+        >
           <Button
             variant="contained"
             onClick={handlePrevious}
-            disabled={currentStep <= -1 || isAutoPlaying}
-            startIcon={<ArrowBack />}
+            disabled={currentStep <= 0 || isAutoPlaying}
+            size={isMobile ? "small" : "medium"}
+            fullWidth={isMobile}
           >
             Previous
           </Button>
@@ -291,38 +311,47 @@ const InsertionSort = () => {
             variant="contained"
             onClick={handleNext}
             disabled={currentStep >= steps.length - 1 || isAutoPlaying}
-            endIcon={<ArrowForward />}
+            size={isMobile ? "small" : "medium"}
+            fullWidth={isMobile}
           >
             Next
           </Button>
           <Button
             variant="contained"
             onClick={handleAutoPlay}
-            disabled={currentStep >= steps.length - 1}
-            color={isAutoPlaying ? "error" : "secondary"}
+            color={isAutoPlaying ? "error" : "primary"}
+            size={isMobile ? "small" : "medium"}
+            fullWidth={isMobile}
           >
             {isAutoPlaying ? "Stop" : "Auto Play"}
           </Button>
         </Stack>
       )}
-      
-      {result && (
-        <Typography sx={{ mb: 2 }} color="primary" align="center" variant="h6">
-          {result}
-        </Typography>
-      )}
-      
-      <Box sx={{ height: '400px', border: '1px solid #ccc' }}>
-        <ReactFlow 
+
+      <Typography 
+        variant={isMobile ? "body2" : "body1"} 
+        sx={{ mb: 2, color: 'black' }}
+      >
+        {result}
+      </Typography>
+
+      <div style={{ height: isMobile ? 300 : 400 }}>
+        <ReactFlow
           nodes={nodes}
           edges={edges}
           nodeTypes={nodeTypes}
           fitView
+          minZoom={0.2}
+          maxZoom={4}
         >
           <Background />
-          <Controls />
+          <Controls 
+            showZoom={!isMobile}
+            showFitView={!isMobile}
+            showInteractive={!isMobile}
+          />
         </ReactFlow>
-      </Box>
+      </div>
     </Box>
   )
 }
